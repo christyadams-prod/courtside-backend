@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Miller Courtside</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+* { box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #F3EFE4; color: #1C2321; margin: 0; }
+button, input { font-family: 'Inter', sans-serif; }
+header { display: flex; justify-content: space-between; align-items: center; background: #1C2321; padding: 16px 24px; flex-wrap: wrap; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-mark { font-family: 'Oswald', sans-serif; font-weight: 700; color: #D8B23A; border: 2px solid #D8B23A; border-radius: 6px; padding: 4px 8px; font-size: 14px; letter-spacing: 1px; }
+h1 { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 22px; color: #F3EFE4; margin: 0; }
+header p { font-size: 13px; color: #B7BDB4; margin: 2px 0 0; }
+nav { display: flex; gap: 8px; }
+.tab { background: transparent; border: 1px solid #4A524C; color: #D8DAD4; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.tab.active { background: #B85C38; border-color: #B85C38; color: #FFF; }
+main { display: flex; gap: 20px; padding: 24px; align-items: flex-start; flex-wrap: wrap; }
+.map-pane { flex: 2 1 480px; min-width: 320px; }
+.panel-pane { flex: 1 1 320px; min-width: 300px; }
+.legend { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; font-size: 12px; color: #4A524C; }
+.legend span { display: flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.court-block { background: #3B3B39; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+.court-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.court-card { border: none; border-radius: 6px; padding: 14px 6px; min-height: 88px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
+.court-num { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 22px; color: #FFF; }
+.court-open-label, .court-est { font-size: 11px; color: rgba(255,255,255,0.85); }
+.court-players { display: block; font-size: 10.5px; color: #FFF; line-height: 1.3; padding: 0 4px; text-align: center; }
+.panel, .panel-empty { background: #FFF; border: 1px solid #DEDACD; border-radius: 10px; padding: 20px; }
+.panel-empty { border: 1px dashed #C9C4B4; }
+.panel-header { display: flex; justify-content: space-between; align-items: center; }
+.panel-title { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 18px; margin: 0 0 8px; }
+.panel-status { font-size: 13px; color: #5F5E5A; margin-bottom: 14px; }
+.link-btn { background: none; border: none; color: #B85C38; font-size: 13px; font-weight: 500; cursor: pointer; }
+label.field-label { display: block; font-size: 12px; color: #5F5E5A; margin-bottom: 6px; margin-top: 12px; }
+.text-input { width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #D3D1C7; font-size: 13px; outline: none; }
+.roster-list { max-height: 260px; overflow-y: auto; margin-top: 10px; border: 1px solid #EDEADF; border-radius: 6px; }
+.roster-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 13px; border-bottom: 1px solid #F1EFE8; }
+.grade-tag { margin-left: auto; font-size: 11px; color: #8A8880; }
+.busy-tag { font-size: 10px; color: #B85C38; }
+.primary-btn { width: 100%; background: #B85C38; color: #FFF; border: none; border-radius: 6px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+.primary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.status-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.secondary-btn { background: #F3EFE4; border: 1px solid #D3D1C7; border-radius: 6px; padding: 10px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.danger-btn { background: #FFF; border: 1px solid #E24B4A; color: #A32D2D; border-radius: 6px; padding: 10px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.sub-confirm { font-size: 12px; color: #3F6B3F; font-weight: 500; margin-top: 10px; }
+.inbox { display: flex; flex-direction: column; gap: 10px; }
+.bubble { background: #F3EFE4; border-radius: 10px; padding: 10px 12px; }
+.bubble p { font-size: 13px; margin: 0; line-height: 1.4; }
+.bubble span { font-size: 10.5px; color: #8A8880; }
+.mini-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
+.mini-court { border-radius: 6px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; }
+.mini-num { font-family: 'Oswald', sans-serif; font-weight: 700; color: #FFF; font-size: 14px; }
+.mini-status { font-size: 9px; color: rgba(255,255,255,0.85); }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">NHS</div>
+    <div>
+      <h1>Miller Courtside</h1>
+      <p>Noblesville tennis, live court assignments</p>
+    </div>
+  </div>
+  <nav>
+    <button class="tab active" id="tab-manager">Team manager</button>
+    <button class="tab" id="tab-parent">Parent sign-up</button>
+  </nav>
+</header>
+
+<main id="manager-view">
+  <section class="map-pane">
+    <div class="legend">
+      <span><i class="dot" style="background:#8A8F86"></i>Open</span>
+      <span><i class="dot" style="background:#B85C38"></i>Assigned</span>
+      <span><i class="dot" style="background:#D8B23A"></i>Warming up</span>
+      <span><i class="dot" style="background:#3F6B3F"></i>In progress</span>
+    </div>
+    <div class="court-block"><div class="court-row" id="row-top"></div></div>
+    <div class="court-block"><div class="court-row" id="row-bottom"></div></div>
+  </section>
+  <aside class="panel-pane" id="manager-panel">
+    <div class="panel-empty">
+      <h2 class="panel-title">Tap a court to assign it</h2>
+      <p class="panel-status">Selecting players sends parents who signed up for alerts a text the moment a court opens.</p>
+    </div>
+  </aside>
+</main>
+
+<main id="parent-view" class="hidden">
+  <section class="panel-pane" style="flex:1 1 360px;">
+    <div class="panel">
+      <h2 class="panel-title">Get alerts for your player</h2>
+      <p class="panel-status">No app download needed on match day. Pick your player below and this device will show the texts they'd receive.</p>
+      <input class="text-input" id="parent-search" placeholder="Search roster" />
+      <div class="roster-list" id="parent-roster"></div>
+      <p class="sub-confirm hidden" id="sub-confirm"></p>
+    </div>
+  </section>
+  <aside class="panel-pane">
+    <div class="panel">
+      <h2 class="panel-title">Your texts</h2>
+      <p class="panel-status" id="inbox-empty">Pick a player to see alerts appear here.</p>
+      <div class="inbox" id="inbox"></div>
+    </div>
+    <div class="panel" style="margin-top:16px;">
+      <h2 class="panel-title">Court board</h2>
+      <div class="mini-grid" id="mini-grid"></div>
+    </div>
+  </aside>
+</main>
+
+<script>
+// ---- point this at your deployed backend ----
+const API = "https://courtside-backend-1ugv.onrender.com";
+
+const ROSTER = [
+  {name:"Hadden Irwin",grade:12},{name:"Joey Beahrs",grade:12},{name:"Joey Schmiegel",grade:12},
+  {name:"Nicky Schmiegel",grade:12},{name:"Alex King",grade:12},{name:"Auggie Vendt",grade:11},
+  {name:"Elijah Mason",grade:11},{name:"Evan Fraundorfer",grade:11},{name:"Henry Ortman",grade:11},
+  {name:"Zack Couzens",grade:11},{name:"Harold May",grade:11},{name:"John-Henry Colglazier",grade:11},
+  {name:"Max Graham",grade:11},{name:"Carter Metzger",grade:11},{name:"Jake Andrews",grade:11},
+  {name:"Lucas Kidwell",grade:11},{name:"Finn Stallings",grade:10},{name:"Raul Flores-Berry",grade:10},
+  {name:"Eli Creakbaum",grade:10},{name:"Beau Martin",grade:10},{name:"Evan Dinius",grade:10},
+  {name:"Nick Graham",grade:10},{name:"Andrew Mulis",grade:10},{name:"Ben Rego",grade:10},
+  {name:"Jack Jennings",grade:10},{name:"Zeb Estelle",grade:10},{name:"Coen Wariner",grade:10},
+  {name:"Aiden Proctor",grade:10},{name:"Caden Side",grade:9},{name:"Griffin Goodknight",grade:9},
+  {name:"Brady Filler",grade:9},{name:"Flynn Clark",grade:9},{name:"Jake Moorlag",grade:9},
+  {name:"Hansik Ryagalla",grade:9},{name:"Tyson Jacobs",grade:9},{name:"Luke Davidson",grade:9},
+  {name:"Miguel Deines",grade:9},{name:"Jaxson Jones",grade:9},
+];
+const ROW_TOP = [7,8,9,10,11,12];
+const ROW_BOTTOM = [6,5,4,3,2,1];
+const STATUS_LABEL = {open:"Open",assigned:"Assigned",warming:"Warming up",inprogress:"In progress"};
+const STATUS_COLOR = {open:"#8A8F86",assigned:"#B85C38",warming:"#D8B23A",inprogress:"#3F6B3F"};
+
+let courts = {};
+let selectedCourt = null;
+let pendingPlayers = [];
+let subs = JSON.parse(localStorage.getItem("courtside-subs") || "[]");
+
+function timeAgo(iso){
+  const diff = Math.max(0, Date.now() - new Date(iso).getTime());
+  const mins = Math.floor(diff/60000);
+  if (mins < 1) return "just now";
+  if (mins === 1) return "1 min ago";
+  if (mins < 60) return `${mins} min ago`;
+  return `${Math.floor(mins/60)} hr ago`;
+}
+
+async function loadCourts(){
+  try {
+    const res = await fetch(`${API}/courts`);
+    courts = await res.json();
+    renderCourts();
+    renderMiniGrid();
+    if (selectedCourt) renderManagerPanel();
+  } catch(e){ console.error("Failed to load courts", e); }
+}
+
+async function loadInbox(){
+  if (subs.length === 0) return;
+  try {
+    const res = await fetch(`${API}/notifications?players=${encodeURIComponent(subs.join(","))}`);
+    const rows = await res.json();
+    renderInbox(rows);
+  } catch(e){ console.error("Failed to load notifications", e); }
+}
+
+function courtCardHTML(num){
+  const c = courts[num] || {status:"open", players:[], est:null};
+  const color = STATUS_COLOR[c.status];
+  const inner = c.status !== "open"
+    ? `<span class="court-players">${(c.players||[]).join(" / ")}</span>${c.est ? `<span class="court-est">${c.est}</span>` : ""}`
+    : `<span class="court-open-label">Open</span>`;
+  const outline = selectedCourt === num ? "outline:3px solid #1C2321;outline-offset:2px;" : "";
+  return `<button class="court-card" style="background:${color};${outline}" data-court="${num}">
+    <span class="court-num">${num}</span>${inner}
+  </button>`;
+}
+
+function renderCourts(){
+  document.getElementById("row-top").innerHTML = ROW_TOP.map(courtCardHTML).join("");
+  document.getElementById("row-bottom").innerHTML = ROW_BOTTOM.map(courtCardHTML).join("");
+  document.querySelectorAll(".court-card").forEach(btn => {
+    btn.addEventListener("click", () => openAssign(Number(btn.dataset.court)));
+  });
+}
+
+function renderMiniGrid(){
+  const all = [...ROW_TOP, ...ROW_BOTTOM].sort((a,b) => a-b);
+  document.getElementById("mini-grid").innerHTML = all.map(n => {
+    const c = courts[n] || {status:"open"};
+    return `<div class="mini-court" style="background:${STATUS_COLOR[c.status]}">
+      <span class="mini-num">${n}</span><span class="mini-status">${STATUS_LABEL[c.status]}</span>
+    </div>`;
+  }).join("");
+}
+
+function openAssign(num){
+  selectedCourt = num;
+  const c = courts[num] || {status:"open", players:[], est:""};
+  pendingPlayers = [...(c.players||[])];
+  renderCourts();
+  renderManagerPanel();
+}
+
+function closeAssign(){
+  selectedCourt = null;
+  pendingPlayers = [];
+  renderCourts();
+  document.getElementById("manager-panel").innerHTML = `
+    <div class="panel-empty">
+      <h2 class="panel-title">Tap a court to assign it</h2>
+      <p class="panel-status">Selecting players sends parents who signed up for alerts a text the moment a court opens.</p>
+    </div>`;
+}
+
+function courtOwnerMap(){
+  const owner = {};
+  Object.entries(courts).forEach(([num, c]) => {
+    (c.players||[]).forEach(p => { owner[p] = num; });
+  });
+  return owner;
+}
+
+function renderManagerPanel(query){
+  const num = selectedCourt;
+  const c = courts[num] || {status:"open", players:[], est:""};
+  const owner = courtOwnerMap();
+  const q = (query || "").toLowerCase();
+  const rosterHTML = ROSTER.filter(r => r.name.toLowerCase().includes(q)).map(r => {
+    const busyElsewhere = owner[r.name] && String(owner[r.name]) !== String(num);
+    const checked = pendingPlayers.includes(r.name);
+    return `<label class="roster-row" style="opacity:${busyElsewhere && !checked ? 0.45 : 1}">
+      <input type="checkbox" data-player="${r.name}" ${checked ? "checked" : ""} />
+      <span>${r.name}</span><span class="grade-tag">Gr ${r.grade}</span>
+      ${busyElsewhere ? `<span class="busy-tag">on court ${owner[r.name]}</span>` : ""}
+    </label>`;
+  }).join("");
+
+  let statusActions = "";
+  if (c.status !== "open") {
+    if (c.status === "assigned") statusActions += `<button class="secondary-btn" id="btn-warming">Start warming up</button>`;
+    if (c.status === "warming") statusActions += `<button class="secondary-btn" id="btn-inprogress">Mark in progress</button>`;
+    if (c.status === "inprogress") statusActions += `<button class="secondary-btn" id="btn-complete">Complete match</button>`;
+    statusActions += `<button class="danger-btn" id="btn-clear">Clear court</button>`;
+  }
+
+  document.getElementById("manager-panel").innerHTML = `
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">Court ${num}</h2>
+        <button class="link-btn" id="btn-close">Close</button>
+      </div>
+      <p class="panel-status">${STATUS_LABEL[c.status]}</p>
+      <label class="field-label">Players (up to 2)</label>
+      <input class="text-input" id="roster-search" placeholder="Search roster" value="${query || ""}" />
+      <div class="roster-list">${rosterHTML}</div>
+      <label class="field-label">Estimated start</label>
+      <input class="text-input" id="est-input" placeholder="e.g. 5:45 PM or in 15 min" value="${c.status === "open" ? "" : (c.est || "")}" />
+      <button class="primary-btn" id="btn-assign" ${pendingPlayers.length === 0 ? "disabled" : ""}>
+        ${c.status === "open" ? "Assign court" : "Save reassignment"}
+      </button>
+      <div class="status-actions">${statusActions}</div>
+    </div>`;
+
+  document.getElementById("btn-close").onclick = closeAssign;
+  document.getElementById("roster-search").oninput = (e) => renderManagerPanel(e.target.value);
+  document.querySelectorAll('[data-player]').forEach(cb => {
+    cb.onchange = () => {
+      const name = cb.dataset.player;
+      if (pendingPlayers.includes(name)) pendingPlayers = pendingPlayers.filter(p => p !== name);
+      else if (pendingPlayers.length < 2) pendingPlayers.push(name);
+      renderManagerPanel(document.getElementById("roster-search").value);
+    };
+  });
+  document.getElementById("btn-assign").onclick = confirmAssign;
+  if (document.getElementById("btn-warming")) document.getElementById("btn-warming").onclick = () => setStatus("warming");
+  if (document.getElementById("btn-inprogress")) document.getElementById("btn-inprogress").onclick = () => setStatus("inprogress");
+  if (document.getElementById("btn-complete")) document.getElementById("btn-complete").onclick = () => setStatus("open");
+  if (document.getElementById("btn-clear")) document.getElementById("btn-clear").onclick = () => setStatus("open");
+}
+
+async function confirmAssign(){
+  if (pendingPlayers.length === 0 || !selectedCourt) return;
+  const est = document.getElementById("est-input").value;
+  await fetch(`${API}/courts/${selectedCourt}/assign`, {
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ playerNames: pendingPlayers, est })
+  });
+  closeAssign();
+  loadCourts();
+}
+
+async function setStatus(status){
+  if (!selectedCourt) return;
+  await fetch(`${API}/courts/${selectedCourt}/status`, {
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ status })
+  });
+  closeAssign();
+  loadCourts();
+}
+
+// ---- parent view ----
+function renderParentRoster(query){
+  const q = (query || "").toLowerCase();
+  document.getElementById("parent-roster").innerHTML = ROSTER
+    .filter(r => r.name.toLowerCase().includes(q))
+    .map(r => `<label class="roster-row">
+      <input type="checkbox" data-sub="${r.name}" ${subs.includes(r.name) ? "checked" : ""} />
+      <span>${r.name}</span><span class="grade-tag">Gr ${r.grade}</span>
+    </label>`).join("");
+  document.querySelectorAll('[data-sub]').forEach(cb => {
+    cb.onchange = () => {
+      const name = cb.dataset.sub;
+      if (subs.includes(name)) subs = subs.filter(p => p !== name);
+      else subs.push(name);
+      localStorage.setItem("courtside-subs", JSON.stringify(subs));
+      updateSubConfirm();
+      loadInbox();
+    };
+  });
+}
+
+function updateSubConfirm(){
+  const el = document.getElementById("sub-confirm");
+  if (subs.length === 0) { el.classList.add("hidden"); return; }
+  el.classList.remove("hidden");
+  el.textContent = `Signed up for ${subs.length === 1 ? subs[0] : subs.length + " players"}.`;
+}
+
+function renderInbox(rows){
+  const inboxEl = document.getElementById("inbox");
+  const emptyEl = document.getElementById("inbox-empty");
+  if (subs.length === 0) {
+    emptyEl.textContent = "Pick a player to see alerts appear here.";
+    emptyEl.classList.remove("hidden");
+    inboxEl.innerHTML = "";
+    return;
+  }
+  if (!rows || rows.length === 0) {
+    emptyEl.textContent = "No court assignments yet. This updates automatically.";
+    emptyEl.classList.remove("hidden");
+    inboxEl.innerHTML = "";
+    return;
+  }
+  emptyEl.classList.add("hidden");
+  inboxEl.innerHTML = rows.map(n => `
+    <div class="bubble"><p>${n.message}</p><span>${timeAgo(n.sent_at)}</span></div>
+  `).join("");
+}
+
+// ---- tabs ----
+document.getElementById("tab-manager").onclick = () => {
+  document.getElementById("tab-manager").classList.add("active");
+  document.getElementById("tab-parent").classList.remove("active");
+  document.getElementById("manager-view").classList.remove("hidden");
+  document.getElementById("parent-view").classList.add("hidden");
+};
+document.getElementById("tab-parent").onclick = () => {
+  document.getElementById("tab-parent").classList.add("active");
+  document.getElementById("tab-manager").classList.remove("active");
+  document.getElementById("parent-view").classList.remove("hidden");
+  document.getElementById("manager-view").classList.add("hidden");
+  loadInbox();
+};
+document.getElementById("parent-search").oninput = (e) => renderParentRoster(e.target.value);
+
+// ---- init ----
+renderParentRoster("");
+updateSubConfirm();
+loadCourts();
+loadInbox();
+setInterval(loadCourts, 4000);
+setInterval(loadInbox, 4000);
+</script>
+</body>
+</html>
