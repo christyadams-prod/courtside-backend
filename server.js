@@ -96,6 +96,33 @@ app.get("/courts", async (req, res) => {
   res.json(await getCourtsState());
 });
 
+// ---- notification history, optionally filtered to specific players ----
+app.get("/notifications", async (req, res) => {
+  const playersParam = req.query.players;
+  let rows;
+  if (playersParam) {
+    const names = String(playersParam).split(",").map((s) => s.trim()).filter(Boolean);
+    rows = (
+      await pool.query(
+        `select n.id, n.court_number, n.type, n.message, n.sent_at, p.name as player
+         from notifications n join players p on p.id = n.player_id
+         where p.name = any($1::text[])
+         order by n.sent_at desc limit 100`,
+        [names]
+      )
+    ).rows;
+  } else {
+    rows = (
+      await pool.query(
+        `select n.id, n.court_number, n.type, n.message, n.sent_at, p.name as player
+         from notifications n join players p on p.id = n.player_id
+         order by n.sent_at desc limit 100`
+      )
+    ).rows;
+  }
+  res.json(rows);
+});
+
 // ---- manager assigns or reassigns a court ----
 app.post("/courts/:num/assign", async (req, res) => {
   const num = Number(req.params.num);
